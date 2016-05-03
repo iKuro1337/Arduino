@@ -8,6 +8,11 @@ BH1750 czujnikSwiatla;
 #define PIRinput 0b00000001 //0
 #define czujnikLewy 0b00000010 //1
 #define czujnikPrawy 0b00000100 //2
+#define prz1 0b00001000 //3
+#define prz2 0b00010000 //4
+#define prz3 0b00100000 //5
+#define prz4 0b01000000 //6
+#define debug_on 0b10000000 //7
 
 #define szafaZewnatrz 0b00000001 //31
 #define szafaGora 0b00000010 //30
@@ -20,7 +25,7 @@ BH1750 czujnikSwiatla;
 
 void setup() {
   //BH1750
-  czujnikSwiatla.configure(BH1750_CONTINUOUS_HIGH_RES_MODE);
+  czujnikSwiatla.configure(BH1750_CONTINUOUS_LOW_RES_MODE);
 
   //LCD
   lcd.begin(20,4);   // Inicjalizacja LCD 4x20
@@ -43,7 +48,7 @@ void setup() {
   //  pinMode(czujnikLewy, INPUT_PULLUP);
   //  pinMode(czujnikPrawy, INPUT_PULLUP);
   DDRB |= 0b00000000;
-  PORTB |= 0b00000000;
+  PORTB |= 0b00000110;
   
   //PINY - OUTPUT
   //  pinMode(szafaZewnatrz, OUTPUT);
@@ -60,8 +65,7 @@ void setup() {
   
 }
 
-
-void diagnostykaLCD(bool pir_in, bool czl_in, bool czp_in, bool szZ, bool szG, bool sz1, bool sz2, bool sz3, bool sz4, bool sz5, bool sz6, uint16_t lux_in){
+void diagnostykaLCD(uint16_t lux_in, bool pir_in, bool czl_in, bool czp_in, bool szZ, bool szG, bool sz1, bool sz2, bool sz3, bool sz4, bool sz5, bool sz6){
   char buffer[20];
   
   //lcd.clear();
@@ -117,16 +121,24 @@ void loop() {
 //PROGRAM
 //********************************************************************************************************************************************************************************
 
-  //diagnostyka stanów na podpiętym LCD
-  diagnostykaLCD(lux_st, PIR_st, CZL_st, CZP_st, SZZ_st, SZG_st, SZ1_st, SZ2_st, SZ3_st, SZ4_st, SZ5_st, SZ6_st);
-
-  WYJSCIA_out |= (PIR_st & !CZL_st & !CZP_st) ? (0b11111111) : (0b00000000);
+  //Jezeli wykryto ruch:
+  WYJSCIA_out |= PIR_st ? szafaZewnatrz : 0b00000000;
+  WYJSCIA_out |= (PIR_st & (CZL_st | CZP_st)) ? szafaGora : 0b00000000;
+  WYJSCIA_out |= (PIR_st & CZL_st) ? szafaPolka1 + szafaPolka2 : 0b00000000;
+  WYJSCIA_out |= (PIR_st & CZP_st) ? szafaPolka3 + szafaPolka4 + szafaPolka5 + szafaPolka6 : 0b00000000;
+  //WYJSCIA_out |= (PIR_st & (CZL_st | CZP_st)) ? (0b11111111) : (0b00000000);
   //PORTA ^= szafaPolka1; //digitalWrite(szafaPolka3,!digitalRead(szafaPolka3));
+
 
 //********************************************************************************************************************************************************************************
 //WYSTEROWANIE WYJSC
 //********************************************************************************************************************************************************************************
 
-  PORTA |= WYJSCIA_out;
+  PORTA = WYJSCIA_out;
   delay(200);
+
+//diagnostyka stanów na podpiętym LCD
+  //if (WEJSCIA & debug_on){
+    diagnostykaLCD(lux_st, PIR_st, CZL_st, CZP_st, SZZ_st, SZG_st, SZ1_st, SZ2_st, SZ3_st, SZ4_st, SZ5_st, SZ6_st);
+  //}
 }
