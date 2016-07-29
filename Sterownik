@@ -1,0 +1,27 @@
+Sterownik oświetlenia w szafie oraz przejścia obok szafy
+
+BOM płytka bazowa:
+8x rezystor 10k
+8x rezystor 60
+8x IRLZ44N
+8x złącza ARK 2pin
+nx Listwy goldpin
+
+BOM płytka sterująca Atmega32:
+1x Atmega32
+2x Zworka
+1x Przycisk monostabilny
+1x złącze ARK 2pin
+4x kondensator 100n
+1x rezystor 10k
+1x rezystor pod diode (ok 200)
+nx listwy goldpin
+
+BOM obudowa:
+3x JACK stereo (2 mogą być MONO)
+1x wyświetlacz 4x20 z przetwornikiem i2c
+1x czujnik ruchu PIR 5V HC-SR501
+WIP czujnik oświetlenia.
+
+Błędy na płytce sterującej Atmega 32 (v1)
+1) Odwrócone piny zasilające płytkę bazową 5V i 12V - jest 12V po lewej, 5V po prawej, ma być 5V po lewej, 12 po prawej.
